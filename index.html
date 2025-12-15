@@ -1,0 +1,718 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zendesk Article Code Generator</title>
+  <style>
+    :root{
+      /* Dark */
+      --bg:#0b1220;
+      --bg-grad-1: rgba(124,58,237,.22);
+      --bg-grad-2: rgba(234,57,52,.18);
+
+      --card-grad-1: rgba(255,255,255,.04);
+      --card-grad-2: rgba(255,255,255,.02);
+      --line:rgba(255,255,255,.10);
+
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.65);
+
+      --chip-bg: rgba(124,58,237,.18);
+      --chip-border: rgba(124,58,237,.35);
+
+      --input-bg: rgba(0,0,0,.22);
+      --input-border: rgba(255,255,255,.12);
+
+      --btn-bg: rgba(255,255,255,.06);
+      --btn-bg-hover: rgba(255,255,255,.10);
+      --btn-border: rgba(255,255,255,.14);
+      --btn-border-hover: rgba(255,255,255,.22);
+
+      --danger-bg: rgba(234,57,52,.18);
+      --danger-border: rgba(234,57,52,.35);
+
+      --shadow: 0 12px 30px rgba(0,0,0,.22);
+
+      --badge-bg: rgba(0,0,0,.18);
+      --badge-border: rgba(255,255,255,.12);
+
+      --list-bg: rgba(0,0,0,.18);
+      --list-border: rgba(255,255,255,.10);
+
+      --dot: rgba(124,58,237,.95);
+      --dot-ring: rgba(124,58,237,.18);
+
+      --primary-grad-1: rgba(124,58,237,.92);
+      --primary-grad-2: rgba(234,57,52,.85);
+    }
+
+    [data-theme="light"]{
+      /* White */
+      --bg:#f6f7fb;
+      --bg-grad-1: rgba(124,58,237,.14);
+      --bg-grad-2: rgba(234,57,52,.10);
+
+      --card-grad-1: rgba(255,255,255,.92);
+      --card-grad-2: rgba(255,255,255,.86);
+      --line: rgba(12,18,32,.10);
+
+      --text: rgba(12,18,32,.92);
+      --muted: rgba(12,18,32,.62);
+
+      --chip-bg: rgba(124,58,237,.10);
+      --chip-border: rgba(124,58,237,.22);
+
+      --input-bg: rgba(255,255,255,.92);
+      --input-border: rgba(12,18,32,.12);
+
+      --btn-bg: rgba(12,18,32,.04);
+      --btn-bg-hover: rgba(12,18,32,.08);
+      --btn-border: rgba(12,18,32,.12);
+      --btn-border-hover: rgba(12,18,32,.18);
+
+      --danger-bg: rgba(234,57,52,.10);
+      --danger-border: rgba(234,57,52,.20);
+
+      --shadow: 0 14px 34px rgba(16,24,40,.10);
+
+      --badge-bg: rgba(12,18,32,.04);
+      --badge-border: rgba(12,18,32,.10);
+
+      --list-bg: rgba(12,18,32,.03);
+      --list-border: rgba(12,18,32,.10);
+
+      --dot: rgba(124,58,237,.92);
+      --dot-ring: rgba(124,58,237,.14);
+
+      --primary-grad-1: rgba(124,58,237,.92);
+      --primary-grad-2: rgba(234,57,52,.85);
+    }
+
+    body{
+      margin:0;
+      padding:22px;
+      background:
+        radial-gradient(1200px 800px at 10% 0%, var(--bg-grad-1), transparent 60%),
+        radial-gradient(900px 600px at 90% 10%, var(--bg-grad-2), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      line-height:1.45;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+    h1{ font-size:22px; margin:0 0 6px; }
+    .sub{ color:var(--muted); font-size:13px; margin:0; max-width: 980px; }
+
+    .theme-toggle{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--btn-border);
+      background:var(--btn-bg);
+      cursor:pointer;
+      user-select:none;
+      white-space:nowrap;
+      transition: background .12s ease, border-color .12s ease, transform .06s ease;
+      font-size:13px;
+      color:var(--text);
+    }
+    .theme-toggle:hover{ background: var(--btn-bg-hover); border-color: var(--btn-border-hover); }
+    .theme-toggle:active{ transform: translateY(1px); }
+    .theme-dot{
+      width:10px; height:10px; border-radius:50%;
+      background: var(--dot);
+      box-shadow: 0 0 0 3px var(--dot-ring);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap:14px;
+      align-items:start;
+    }
+    .card{
+      background: linear-gradient(180deg, var(--card-grad-1), var(--card-grad-2));
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+    .card h3{
+      margin:0 0 10px;
+      font-size:14px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .pill{
+      font-size:11px;
+      padding:2px 8px;
+      border-radius:999px;
+      background:var(--chip-bg);
+      border:1px solid var(--chip-border);
+      opacity:.9;
+    }
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin:10px 0 6px;
+    }
+    input, textarea, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--input-border);
+      background: var(--input-bg);
+      color:var(--text);
+      outline:none;
+      box-sizing:border-box;
+    }
+    textarea{ min-height:92px; resize:vertical; }
+    code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; }
+    .hint{ margin-top:6px; font-size:12px; color:var(--muted); }
+
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .btns{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:12px;
+    }
+    button{
+      padding:9px 10px;
+      border-radius:12px;
+      border:1px solid var(--btn-border);
+      background: var(--btn-bg);
+      color:var(--text);
+      cursor:pointer;
+      transition: transform .06s ease, background .12s ease, border-color .12s ease;
+      font-size:13px;
+    }
+    button:hover{ background: var(--btn-bg-hover); border-color: var(--btn-border-hover); }
+    button:active{ transform: translateY(1px); }
+    button.primary{
+      background: linear-gradient(135deg, var(--primary-grad-1), var(--primary-grad-2));
+      border-color: var(--btn-border-hover);
+      color: rgba(255,255,255,.98);
+    }
+    button.danger{
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+    }
+
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:12px;
+      min-height:420px;
+    }
+    .status{ font-size:12px; color:var(--muted); margin:10px 0 0; }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--badge-border);
+      background: var(--badge-bg);
+      color:var(--muted);
+      font-size:12px;
+      margin-top:10px;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background: var(--dot);
+      box-shadow: 0 0 0 3px var(--dot-ring);
+    }
+
+    /* FAQ list UI */
+    .faq-list{
+      margin-top:10px;
+      border:1px solid var(--list-border);
+      border-radius:12px;
+      overflow:hidden;
+    }
+    .faq-item{
+      display:flex;
+      gap:10px;
+      padding:10px;
+      border-top:1px solid var(--list-border);
+      background: var(--list-bg);
+      align-items:flex-start;
+    }
+    .faq-item:first-child{ border-top:none; }
+    .faq-q{ flex:1.1; font-size:12px; color:var(--text); word-break:break-word; }
+    .faq-a{ flex:1; font-size:12px; color:var(--muted); word-break:break-word; }
+    .faq-actions{ display:flex; gap:6px; align-items:center; }
+    .mini{ padding:6px 8px; border-radius:10px; font-size:12px; }
+
+    hr{ border:none; border-top:1px solid var(--line); margin:14px 0; }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    <div>
+      <h1>Zendesk Article Code Generator</h1>
+      <p class="sub">
+        Generates Zendesk-safe HTML blocks. FAQ output is wrapped in <b>&lt;zd-html-block&gt;</b> so Zendesk’s new editor does not inject a <b>&lt;p&gt;</b> between the accordion button and content.
+        This preserves your existing theme logic: <b>button.nextElementSibling</b> and <b>button + .accordion-content</b>.
+      </p>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle" type="button" title="Toggle theme">
+      <span class="theme-dot" aria-hidden="true"></span>
+      <span id="themeLabel">Dark mode</span>
+    </button>
+  </div>
+
+
+  <div class="grid">
+    <!-- LEFT -->
+    <div class="card">
+      <h3>Section Builder <span class="pill">Highlighted Box</span></h3>
+
+      <label>Section Title</label>
+      <input id="secTitle" placeholder="e.g., Overview" />
+
+      <label>Highlighted Box Content (HTML allowed)</label>
+      <textarea id="secContent" placeholder="Examples:
+<p>Explain the feature...</p>
+<ol><li>Step 1</li><li>Step 2</li></ol>"></textarea>
+
+      <!-- ✅ NEW: optional media inside the highlighted box (does NOT replace existing Media Blocks) -->
+      <hr />
+      <h3>Optional Media inside this Highlighted Box <span class="pill">Optional</span></h3>
+
+      <label>Media Type</label>
+      <select id="secMediaType">
+        <option value="">None</option>
+        <option value="image">Image (inside box)</option>
+        <option value="video">Video link (inside box)</option>
+      </select>
+
+      <label>Media URL</label>
+      <input id="secMediaUrl" placeholder="Paste Zendesk image URL or Loom link..." />
+
+      <label>Image Alt Text (images only)</label>
+      <input id="secMediaAlt" placeholder="e.g., Emirate targeting settings" />
+      <div class="hint">If Media Type is “None” or URL is empty, no media will be added.</div>
+
+      <div class="btns">
+        <button class="primary" id="addSection" type="button">Add Highlighted Box Section</button>
+        <button id="addTOC" type="button">Add/Update TOC (auto)</button>
+      </div>
+
+      <hr />
+
+      <h3>Media Blocks <span class="pill">styled-gif</span></h3>
+
+      <div class="row2">
+        <div>
+          <label>Image URL</label>
+          <input id="imgUrl" placeholder="https://.../image.png" />
+        </div>
+        <div>
+          <label>Image Alt Text</label>
+          <input id="imgAlt" placeholder="e.g., Emirate targeting settings" />
+        </div>
+      </div>
+
+      <label>Video URL (opens in new tab)</label>
+      <input id="videoUrl" placeholder="https://www.loom.com/share/..." />
+
+      <div class="btns">
+        <button id="addImage" type="button">Add Image (class styled-gif)</button>
+        <button id="addVideoLink" type="button">Add Video Link (class styled-gif)</button>
+      </div>
+
+      <hr />
+
+      <h3>Try it yourself <span class="pill">Figma Embed</span></h3>
+      <label>Try it Title</label>
+      <input id="tryTitle" placeholder="Try it yourself" />
+
+      <label>Figma URL</label>
+      <input id="tryFigmaUrl" placeholder="https://www.figma.com/file/... or https://www.figma.com/proto/..." />
+
+      <label>Embed Height (px)</label>
+      <input id="tryHeight" placeholder="520" />
+
+      <div class="btns">
+        <button id="addTry" class="primary" type="button">Add Try-it (Figma Embed)</button>
+      </div>
+
+      <div class="hint">
+        Adds an inline Figma preview using an iframe.
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="card">
+      <h3>FAQ Builder <span class="pill">Q/A → Accordion HTML</span></h3>
+
+      <label>Question</label>
+      <input id="faqQ" placeholder="e.g., What are Pending Actions?" />
+
+      <label>Answer (HTML allowed)</label>
+      <textarea id="faqA" placeholder="Type plain text OR paste HTML.
+Example:
+<p>Yes, you can lose it if:</p>
+<ul><li>Condition 1</li><li>Condition 2</li></ul>"></textarea>
+
+      <div class="btns">
+        <button class="primary" id="addFaqItem" type="button">Add FAQ Item</button>
+        <button class="danger" id="clearFaqItems" type="button">Clear FAQ Items</button>
+        <button id="generateFaqBlock" type="button">Generate/Update FAQs</button>
+      </div>
+
+      <div class="badge">
+        <span class="dot"></span>
+        Output guarantees: <b>&lt;button&gt;</b> is immediately followed by <b>&lt;div class="accordion-content"&gt;</b> (required by your theme JS + CSS).
+      </div>
+
+      <div class="faq-list" id="faqList"></div>
+
+      <hr />
+
+      <h3>Output <span class="pill">Copy → Paste in Zendesk</span></h3>
+      <div class="btns">
+        <button class="primary" id="copyOut" type="button">Copy Output</button>
+        <button class="danger" id="clearOut" type="button">Clear Output</button>
+      </div>
+      <textarea id="output" class="mono" placeholder="Generated HTML will appear here..."></textarea>
+      <p class="status" id="status"></p>
+    </div>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  /* =========================
+     THEME TOGGLE
+     ========================= */
+  (function initTheme(){
+    const root = document.documentElement;
+    const label = $("themeLabel");
+    const btn = $("themeToggle");
+
+    function apply(theme){
+      if (theme === "light") root.setAttribute("data-theme", "light");
+      else root.removeAttribute("data-theme");
+      label.textContent = theme === "light" ? "White mode" : "Dark mode";
+      localStorage.setItem("pf_zd_gen_theme", theme);
+    }
+
+    function getInitial(){
+      const saved = localStorage.getItem("pf_zd_gen_theme");
+      if (saved === "light" || saved === "dark") return saved;
+      const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+      return prefersLight ? "light" : "dark";
+    }
+
+    apply(getInitial());
+    btn.addEventListener("click", () => {
+      const current = localStorage.getItem("pf_zd_gen_theme") || getInitial();
+      apply(current === "light" ? "dark" : "light");
+    });
+  })();
+
+  /* =========================
+     HELPERS
+     ========================= */
+  function escAttr(s) {
+    return String(s || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;");
+  }
+
+  function escHtml(s) {
+    return String(s || "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#39;");
+  }
+
+  function stripTags(html) {
+    return String(html || "").replace(/<[^>]*>/g, "").trim();
+  }
+
+  // Upsert blocks between markers so updates replace (no duplicates)
+  function upsertBlock(blockId, html) {
+    const out = $("output");
+    const start = `<!-- ${blockId}:start -->`;
+    const end   = `<!-- ${blockId}:end -->`;
+    const block = `${start}\n${html.trim()}\n${end}`;
+
+    if (out.value.includes(start) && out.value.includes(end)) {
+      const before = out.value.split(start)[0];
+      const after = out.value.split(end)[1];
+      out.value = (before + block + after).trim();
+    } else {
+      const sep = out.value.trim() ? "\n\n" : "";
+      out.value = (out.value + sep + block).trim();
+    }
+  }
+
+  function append(html) {
+    const out = $("output");
+    const sep = out.value.trim() ? "\n\n" : "";
+    out.value = (out.value + sep + html.trim()).trim();
+  }
+
+  function getSectionAnchorsFromOutput() {
+    const out = $("output").value;
+    const matches = [...out.matchAll(/<h2[^>]*id="([^"]+)"[^>]*>(.*?)<\/h2>/gi)];
+    return matches.map(m => ({ id: m[1], title: stripTags(m[2]) }));
+  }
+
+  /* =========================
+     SECTIONS
+     ========================= */
+  $("addSection").addEventListener("click", () => {
+    const title = $("secTitle").value.trim() || "Section title";
+    const content = $("secContent").value.trim() || "<p>Section content…</p>";
+
+    // ✅ NEW: optional media inside section
+    const mediaType = $("secMediaType").value;
+    const mediaUrl = $("secMediaUrl").value.trim();
+    const mediaAlt = $("secMediaAlt").value.trim() || "image";
+
+    let mediaHtml = "";
+    if (mediaType === "image" && mediaUrl) {
+      mediaHtml = `
+  <p>
+    <img class="styled-gif" src="${escAttr(mediaUrl)}" alt="${escAttr(mediaAlt)}">
+  </p>`;
+    } else if (mediaType === "video" && mediaUrl) {
+      mediaHtml = `
+  <p>
+    <a class="styled-gif" href="${escAttr(mediaUrl)}" target="_blank" rel="noopener">Watch the video</a>
+  </p>`;
+    }
+
+    append(`
+<div class="highlighted-box">
+  <h2>${escHtml(title)}</h2>${mediaHtml}
+  ${content}
+</div>`);
+    $("status").textContent = "Section added to output (with optional media, if provided).";
+  });
+
+  /* =========================
+     TOC
+     ========================= */
+  $("addTOC").addEventListener("click", () => {
+    const items = getSectionAnchorsFromOutput();
+    if (!items.length) {
+      $("status").textContent = "Add at least one section first (with an <h2 id='...'>) to generate TOC.";
+      return;
+    }
+    const li = items.map(i => `    <li><a href="#${escAttr(i.id)}">${i.title}</a></li>`).join("\n");
+    const tocHtml = `
+<div class="toc-box">
+  <strong>In this article</strong>
+  <ul>
+${li}
+  </ul>
+</div>`;
+    upsertBlock("TOC", tocHtml);
+    $("status").textContent = "TOC generated/updated from sections in output.";
+  });
+
+  /* =========================
+     MEDIA (styled-gif)
+     ========================= */
+  $("addImage").addEventListener("click", () => {
+    const url = $("imgUrl").value.trim();
+    if (!url) { $("status").textContent = "Please add an Image URL first."; return; }
+    const alt = $("imgAlt").value.trim() || "image";
+    append(`
+<p>
+  <img class="styled-gif" src="${escAttr(url)}" alt="${escAttr(alt)}">
+</p>`);
+    $("status").textContent = "Image block added (class styled-gif).";
+  });
+
+  $("addVideoLink").addEventListener("click", () => {
+    const url = $("videoUrl").value.trim();
+    if (!url) { $("status").textContent = "Please add a Video URL first."; return; }
+
+    append(`
+<div class="highlighted-box">
+  <h2 id="video">Video walkthrough</h2>
+  <p>
+    <a class="styled-gif" href="${escAttr(url)}" target="_blank" rel="noopener">Watch the video</a>
+  </p>
+</div>`);
+    $("status").textContent = "Video block added (link uses class styled-gif).";
+  });
+
+  /* =========================
+     TRY IT — FIGMA EMBED
+     ========================= */
+  $("addTry").addEventListener("click", () => {
+    const title = $("tryTitle").value.trim() || "Try it yourself";
+    const figmaUrl = $("tryFigmaUrl").value.trim();
+    const height = $("tryHeight").value.trim() || "520";
+
+    if (!figmaUrl) { $("status").textContent = "Please add a Figma URL first."; return; }
+
+    const encoded = encodeURIComponent(figmaUrl);
+
+    append(`
+<div class="highlighted-box">
+  <h2 id="try-it">${escHtml(title)}</h2>
+
+  <div class="pf-figma-embed" style="border:1px solid rgba(0,0,0,.12); border-radius:14px; overflow:hidden;">
+    <iframe
+      title="Figma embed"
+      src="https://www.figma.com/embed?embed_host=share&url=${encoded}"
+      style="width:100%; height:${escAttr(height)}px; border:0;"
+      loading="lazy"
+      allowfullscreen>
+    </iframe>
+  </div>
+</div>`);
+    $("status").textContent = "Try-it Figma embed added.";
+  });
+
+  /* =========================
+     FAQ BUILDER
+     ========================= */
+  const faqItems = [];
+
+  function renderFaqList() {
+    const list = $("faqList");
+    if (!faqItems.length) {
+      list.innerHTML = `<div class="faq-item"><div class="faq-q">No FAQ items yet.</div><div class="faq-a">Add a question + answer above.</div></div>`;
+      return;
+    }
+    list.innerHTML = faqItems.map((f, idx) => `
+      <div class="faq-item">
+        <div class="faq-q"><b>Q:</b> ${escHtml(f.q)}</div>
+        <div class="faq-a"><b>A:</b> ${escHtml(stripTags(f.a) || f.a)}</div>
+        <div class="faq-actions">
+          <button class="mini danger" type="button" data-remove="${idx}">Remove</button>
+        </div>
+      </div>
+    `).join("");
+
+    [...list.querySelectorAll("button[data-remove]")].forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = Number(btn.getAttribute("data-remove"));
+        faqItems.splice(i, 1);
+        renderFaqList();
+        $("status").textContent = "FAQ item removed.";
+      });
+    });
+  }
+
+  $("addFaqItem").addEventListener("click", () => {
+    const q = $("faqQ").value.trim();
+    const a = $("faqA").value.trim();
+
+    if (!q || !a) {
+      $("status").textContent = "Please fill both Question and Answer.";
+      return;
+    }
+
+    faqItems.push({ q, a });
+    $("faqQ").value = "";
+    $("faqA").value = "";
+    renderFaqList();
+    $("status").textContent = "FAQ item added. Now click “Generate/Update FAQs”.";
+  });
+
+  $("clearFaqItems").addEventListener("click", () => {
+    faqItems.length = 0;
+    renderFaqList();
+    $("status").textContent = "All FAQ items cleared.";
+  });
+
+  $("generateFaqBlock").addEventListener("click", () => {
+    if (!faqItems.length) {
+      $("status").textContent = "Add at least one FAQ item first.";
+      return;
+    }
+
+    const itemsHtml = faqItems.map((f, idx) => {
+      const n = idx + 1;
+
+      const aRaw = (f.a || "").trim();
+      const answerHtml = /<\/?[a-z][\s\S]*>/i.test(aRaw) ? aRaw : `<p>${escHtml(aRaw)}</p>`;
+      const qText = escHtml(f.q);
+
+      return `
+<div class="accordion-item">
+  <button id="accordion-button-${n}" aria-expanded="false">
+    <span class="accordion-title">${qText}</span>
+    <span class="icon" aria-hidden="true"></span>
+  </button>
+  <div class="accordion-content">
+    ${answerHtml}
+  </div>
+</div>`.trim();
+    }).join("\n");
+
+    const faqBlock = `
+<zd-html-block>
+  <!-- FAQ:start -->
+  <div class="highlighted-box">
+    <h2 id="four" class="bottom-line-h">Frequently Asked Questions</h2>
+    <div class="accordion-container container">
+      <div class="accordion">
+${itemsHtml}
+      </div>
+    </div>
+  </div>
+  <!-- FAQ:end -->
+</zd-html-block>`;
+
+    upsertBlock("FAQ", faqBlock);
+    $("status").textContent = "FAQs generated/updated in output.";
+  });
+
+  renderFaqList();
+
+  /* =========================
+     OUTPUT copy/clear
+     ========================= */
+  $("copyOut").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText($("output").value);
+      $("status").textContent = "Copied output to clipboard.";
+    } catch (e) {
+      $("status").textContent = "Copy failed (browser blocked). Select output text and copy manually.";
+    }
+  });
+
+  $("clearOut").addEventListener("click", () => {
+    $("output").value = "";
+    $("status").textContent = "Output cleared.";
+  });
+</script>
+</body>
+</html>
