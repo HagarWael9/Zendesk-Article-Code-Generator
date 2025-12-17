@@ -794,6 +794,68 @@ ${itemsHtml}
     $("output").value = "";
     $("status").textContent = "Output cleared.";
   });
+  $("addSection").addEventListener("click", () => {
+  const title = $("secTitle").value.trim() || "Section title";
+  const contentRaw = $("secContent").value.trim();
+
+  const tipText = $("secTipText").value.trim();
+  const noteText = $("secNoteText").value.trim();
+
+  // Convert plain text to safe HTML blocks
+  function textToHtml(text) {
+    return text
+      .split("\n\n")
+      .map(block => {
+        if (/^[-•]/m.test(block)) {
+          const items = block.split("\n").map(i => i.replace(/^[-•]\s*/, ""));
+          return `<ul>${items.map(i => `<li>${escHtml(i)}</li>`).join("")}</ul>`;
+        }
+        if (/^\d+\)/m.test(block)) {
+          const items = block.split("\n").map(i => i.replace(/^\d+\)\s*/, ""));
+          return `<ol>${items.map(i => `<li>${escHtml(i)}</li>`).join("")}</ol>`;
+        }
+        return `<p>${escHtml(block)}</p>`;
+      })
+      .join("\n");
+  }
+
+  const contentHtml = contentRaw
+    ? textToHtml(contentRaw)
+    : "<p>Section content…</p>";
+
+  let tipHtml = "";
+  if (tipText) {
+    tipHtml = `
+<div class="tip-section">
+  <span class="wysiwyg-font-size-x-large">💡</span><br>
+  <div class="tip-text">
+    <strong>Tip:</strong> ${escHtml(tipText)}
+  </div>
+</div>`;
+  }
+
+  let noteHtml = "";
+  if (noteText) {
+    noteHtml = `
+<div class="note-section">
+  <img class="note-icon" src="/guide-media/01H25NJPEG344YCABZ70FHJPXE" alt="writing icon">
+  <div class="note-text">
+    <strong>Note:</strong> ${escHtml(noteText)}
+  </div>
+</div>`;
+  }
+
+  append(`
+<div class="highlighted-box">
+  <h2>${escHtml(title)}</h2>
+  ${contentHtml}
+  ${tipHtml}
+  ${noteHtml}
+</div>`);
+
+  $("status").textContent = "Section added (with optional Tip / Note).";
+});
+
 </script>
 </body>
 </html>
