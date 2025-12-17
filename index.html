@@ -1,4 +1,4 @@
-
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -268,7 +268,6 @@
 </head>
 
 <body>
-
   <div class="topbar">
     <div>
       <h1>Zendesk Article Code Generator</h1>
@@ -284,7 +283,6 @@
     </button>
   </div>
 
-
   <div class="grid">
     <!-- LEFT -->
     <div class="card">
@@ -293,12 +291,21 @@
       <label>Section Title</label>
       <input id="secTitle" placeholder="e.g., Overview" />
 
-      <label>Highlighted Box Content (HTML allowed)</label>
-      <textarea id="secContent" placeholder="Examples:
-<p>Explain the feature...</p>
-<ol><li>Step 1</li><li>Step 2</li></ol>"></textarea>
+      <label>Highlighted Box Content (TEXT or HTML)</label>
+      <textarea id="secContent" placeholder="Paste plain text and it will auto-format into HTML.
 
-      <!-- ✅ NEW: optional media inside the highlighted box (does NOT replace existing Media Blocks) -->
+Example:
+This section explains how Pending Actions work.
+
+You can use Pending Actions to:
+- Review listings that require corrections
+- Edit or update flagged listings
+
+Steps:
+1) Open PF Expert
+2) Go to Listing Management"></textarea>
+      <div class="hint">If you paste HTML, it will be used as-is. If you paste plain text, it will convert to &lt;p&gt;, &lt;ul&gt;, and &lt;ol&gt; automatically.</div>
+
       <hr />
       <h3>Optional Media inside this Highlighted Box <span class="pill">Optional</span></h3>
 
@@ -459,6 +466,60 @@ Example:
     return String(html || "").replace(/<[^>]*>/g, "").trim();
   }
 
+  // Plain text → HTML (p/ul/ol). Keeps Zendesk-safe tags only.
+  function plainTextToHtml(text) {
+    const lines = String(text || "").replace(/\r\n/g, "\n").split("\n");
+
+    let html = "";
+    let inUl = false;
+    let inOl = false;
+
+    const closeLists = () => {
+      if (inUl) { html += "</ul>\n"; inUl = false; }
+      if (inOl) { html += "</ol>\n"; inOl = false; }
+    };
+
+    const isBullet = (l) => /^(\s*[-*•]\s+)(.+)$/.test(l);
+    const isNumbered = (l) => /^(\s*\d+[\)\.]\s+)(.+)$/.test(l);
+
+    for (let raw of lines) {
+      const line = raw.trim();
+
+      // blank line = paragraph break + close lists
+      if (!line) {
+        closeLists();
+        continue;
+      }
+
+      // bullet list
+      if (isBullet(line)) {
+        const m = line.match(/^(\s*[-*•]\s+)(.+)$/);
+        const item = escHtml(m[2]);
+        if (inOl) { html += "</ol>\n"; inOl = false; }
+        if (!inUl) { html += "<ul>\n"; inUl = true; }
+        html += `  <li>${item}</li>\n`;
+        continue;
+      }
+
+      // numbered list (1) / 1. / 12)
+      if (isNumbered(line)) {
+        const m = line.match(/^(\s*\d+[\)\.]\s+)(.+)$/);
+        const item = escHtml(m[2]);
+        if (inUl) { html += "</ul>\n"; inUl = false; }
+        if (!inOl) { html += "<ol>\n"; inOl = true; }
+        html += `  <li>${item}</li>\n`;
+        continue;
+      }
+
+      // normal paragraph line
+      closeLists();
+      html += `<p>${escHtml(line)}</p>\n`;
+    }
+
+    closeLists();
+    return html.trim();
+  }
+
   // Upsert blocks between markers so updates replace (no duplicates)
   function upsertBlock(blockId, html) {
     const out = $("output");
@@ -493,9 +554,13 @@ Example:
      ========================= */
   $("addSection").addEventListener("click", () => {
     const title = $("secTitle").value.trim() || "Section title";
-    const content = $("secContent").value.trim() || "<p>Section content…</p>";
 
-    // ✅ NEW: optional media inside section
+    const raw = $("secContent").value.trim();
+    const content =
+      !raw ? "<p>Section content…</p>" :
+      (/<\/?[a-z][\s\S]*>/i.test(raw) ? raw : plainTextToHtml(raw));
+
+    // optional media inside section
     const mediaType = $("secMediaType").value;
     const mediaUrl = $("secMediaUrl").value.trim();
     const mediaAlt = $("secMediaAlt").value.trim() || "image";
@@ -518,7 +583,7 @@ Example:
   <h2>${escHtml(title)}</h2>${mediaHtml}
   ${content}
 </div>`);
-    $("status").textContent = "Section added to output (with optional media, if provided).";
+    $("status").textContent = "Section added to output (plain text auto-formatted; optional media included if provided).";
   });
 
   /* =========================
@@ -716,3 +781,4 @@ ${itemsHtml}
 </script>
 </body>
 </html>
+
